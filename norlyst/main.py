@@ -9,6 +9,6 @@ from norlyst import NorLystMain
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    screen_size = QApplication.desktop().screenGeometry()
+    screen_size = QApplication.desktop().availableGeometry()
     ex = NorLystMain(screen_size)
     sys.exit(app.exec_())

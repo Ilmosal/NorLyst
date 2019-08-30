@@ -88,7 +88,7 @@ CREATE TABLE error_logs(
 GRANT
     UPDATE
 ON
-    event_classification (username, priority, analysis_id, important)
+    event_classification (username, priority, analysis_id, unimportant, done)
 TO
     default_users;
 

@@ -2,6 +2,7 @@
 This module contains all new windows that are openable from eventPage
 """
 import time
+from copy import deepcopy
 
 from scipy import signal
 
@@ -168,7 +169,7 @@ class ImportWindow(QWidget):
         if reviewed:
             for comment in current_event.comment_h:
                 if comment.h_comment.strip() == "FULLY AUTOMATIC LOCATION":
-                    comment.h_comment = "FULLY AUTOMATIC, EVENT TYPE & LOCATION & MAGNITUDE CHECKED ({0})".format(self.database_access.getCurrentUser()[:3].upper())
+                    comment.h_comment = "FULLY AUTOMATIC, EVENT TYPE & LOCATION & MAGNITUDE CHECKED ({0})".format(self.database_accesser.getCurrentUser()[:3].upper())
 
             current_event.comment_h.extend(comments)
 
@@ -196,7 +197,7 @@ class ImportWindow(QWidget):
 
             current_event.comment_h.append(
                 NordicComment(
-                    ["FULLY AUTOMATIC READINGS, EVENT TYPE CHECKED ({0})".format(self.database_access.getCurrentUser()[:3].upper()),
+                    ["FULLY AUTOMATIC READINGS, EVENT TYPE CHECKED ({0})".format(self.database_accesser.getCurrentUser()[:3].upper()),
                      -1,
                      -1]
                 )

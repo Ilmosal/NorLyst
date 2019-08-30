@@ -26,13 +26,17 @@ class OverviewPage(QWidget):
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(OverviewList(self.scroll_area))
+        self.scroll_area.setFixedWidth(900)
+
+        self.title_label = QLabel('<b>EVENT LIST</b>', self)
+        self.title_label.setFixedWidth(250)
 
         self.daily_lock_manager = DailyLockManager(self, database_access)
 
-        self.layout.addWidget(self.daily_lock_manager, 0, 2)
-        self.layout.addWidget(QLabel('<b>EVENT LIST</b>', self), 0, 1)
-        self.layout.addWidget(self.overview_map, 0, 0, 2, 1)
-        self.layout.addWidget(self.scroll_area, 1, 1, 1, 2)
+        self.layout.addWidget(self.daily_lock_manager, 0, 3)
+        self.layout.addWidget(self.title_label, 0, 2)
+        self.layout.addWidget(self.overview_map, 0, 0, 2, 2)
+        self.layout.addWidget(self.scroll_area, 1, 2, 1, 2)
 
         self.setLayout(self.layout)
 
@@ -57,6 +61,7 @@ class DailyLockManager(QWidget):
     """
     def __init__(self, parent, database_access):
         super(QWidget, self).__init__(parent)
+        self.setFixedWidth(650)
         self.layout = QHBoxLayout(self)
         self.layout.setAlignment(Qt.AlignRight)
 
@@ -131,7 +136,6 @@ class OverviewMap(QQuickWidget):
     """
     def __init__(self, parent):
         super(QQuickWidget, self).__init__(parent)
-        self.setFixedWidth(900)
 
         self.model = MarkerModel()
         self.context = self.rootContext()
@@ -301,6 +305,7 @@ class OverviewList(QWidget):
     """
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
+
         self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
         self.layout.setSpacing(8)
@@ -416,8 +421,8 @@ class EventBox(QFrame):
     """
     def __init__(self, parent, event_classification, lock_status):
         super(QFrame, self).__init__(parent)
+        self.setFixedWidth(850)
         self.setFrameStyle(QFrame.Box)
-        self.setFixedHeight(60)
         if event_classification.focus:
             self.setLineWidth(3)
 
@@ -425,22 +430,29 @@ class EventBox(QFrame):
 
         self.layout = QGridLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
 
         self.__text_layout = QVBoxLayout()
-        self.__text_layout.setSpacing(0)
+        self.__text_layout.setSpacing(5)
+        self.__text_layout.setContentsMargins(5, 5, 5, 5)
         self.__button_layout = QHBoxLayout()
         self.__button_layout.setSpacing(4)
+        self.__button_layout.setContentsMargins(5, 5, 5, 5)
 
         self.__event_classification = event_classification
         event = self.__event_classification.getEvent()
+
+        self.__id_label = QLabel('ID: {0}'.format(event.event_id))
+        self.__id_label.setContentsMargins(5, 5, 5, 5)
+        self.__id_label.setStyleSheet('background-color: rgb({0}, {1}, {2}); border-bottom: 1px solid black'.format(*CLASSIFICATION_COLOR_DICT[event_classification.classification]))
 
         if event.getOriginTime() is None:
             origin_time = "-"
         else:
             origin_time = event.getOriginTime().val.strftime("%H:%M:%S")
 
-        self.__event_values_text = QLabel('ID: {0}    Time: {1}    Latitude: {2}    Longitude: {3}    Magnitude: {4}'.format(
-            event.event_id,
+        self.__event_values_text = QLabel('Time: {0}    Latitude: {1}    Longitude: {2}    Magnitude: {3}'.format(
             origin_time,
             event.getLatitude().val,
             event.getLongitude().val,
@@ -478,21 +490,22 @@ class EventBox(QFrame):
         self.__set_as_important_button.setFixedSize(25, 25)
         self.__set_as_important_button.clicked.connect(self.setAsImportantPressed)
 
-        self.__highlight_event_button = QPushButton('', self)
-        self.__highlight_event_button.setIcon(QIcon('resources/icons/focus_on_event.png'))
-        self.__highlight_event_button.setFixedSize(25, 25)
-        self.__highlight_event_button.clicked.connect(self.highlightEvent)
+#        self.__highlight_event_button = QPushButton('', self)
+#        self.__highlight_event_button.setIcon(QIcon('resources/icons/focus_on_event.png'))
+#        self.__highlight_event_button.setFixedSize(25, 25)
+#        self.__highlight_event_button.clicked.connect(self.highlightEvent)
 
         self.__text_layout.addWidget(self.__event_values_text)
         self.__text_layout.addWidget(self.__event_categorization_text)
 
-        self.__button_layout.addWidget(self.__highlight_event_button, 0, Qt.AlignTop)
+#        self.__button_layout.addWidget(self.__highlight_event_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__remove_priority_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__push_to_top_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__set_as_important_button, 0, Qt.AlignTop)
 
-        self.layout.addLayout(self.__text_layout, 0, 0)
-        self.layout.addLayout(self.__button_layout, 0, 1)
+        self.layout.addWidget(self.__id_label, 0, 0, 1, 2)
+        self.layout.addLayout(self.__text_layout, 1, 0)
+        self.layout.addLayout(self.__button_layout, 1, 1)
 
         if lock_status:
             self.unlockEventBox()
@@ -557,7 +570,10 @@ class EventBox(QFrame):
         """
         Function for pushing a event to the top of the priority list
         """
+        print(self.__event_classification.priority)
         self.__event_classification.priority = self.parent().getNewPriorityNumber()
+        print(self.__event_classification.priority)
+
         self.parent().parent().parent().parent().parent().parent().parent().setEventClassifications()
         self.__remove_priority_button.setVisible(True)
         self.__remove_priority_button.repaint()
@@ -568,6 +584,8 @@ class EventBox(QFrame):
         """
         self.__set_as_important_button.setEnabled(True)
         self.__push_to_top_button.setEnabled(True)
+        self.__remove_priority_button.setEnabled(True)
+
 
     def lockEventBox(self):
         """
@@ -575,6 +593,7 @@ class EventBox(QFrame):
         """
         self.__set_as_important_button.setEnabled(False)
         self.__push_to_top_button.setEnabled(False)
+        self.__remove_priority_button.setEnabled(False)
 
     def highlightEvent(self):
         """
@@ -582,3 +601,8 @@ class EventBox(QFrame):
         """
         self.parent().parent().parent().parent().parent().parent().parent().focusOnEvent(self.__event_classification.event_id)
 
+    def mousePressEvent(self, event):
+        """
+        Highlight the event classification when clicking an event classification box
+        """
+        self.highlightEvent()

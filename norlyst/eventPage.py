@@ -1,7 +1,6 @@
 """
 This module contains EventPage class and all relevant objects
 """
-from copy import deepcopy
 from datetime import datetime
 import numpy
 
@@ -96,8 +95,8 @@ class EventPage(QWidget):
         if current_event_class is None:
             return
 
-        nordic_filename = current_event_class.event.waveform_h[0].
-        filename = QFileDialog.getSaveFileName(self, "Save file", , ".n")[0]
+        nordic_filename = current_event_class.event.waveform_h[0].waveform_info
+        filename = QFileDialog.getSaveFileName(self, "Save file", nordic_filename, ".n")[0]
 
         if filename.strip() == "":
             return
@@ -308,9 +307,9 @@ class WaveformPlotWidget(QWidget):
         self.plot_widget = PlotWidget(self)
         self.plot_widget.getPlotItem().setLabel('bottom', 'time')
 
-        self.s_pick_pen = mkPen(color = (255, 0, 0), width = 1.0)
-        self.p_pick_pen = mkPen(color = (0, 255, 0), width = 1.0)
-        self.msg_pick_pen = mkPen(color = (255, 255, 0), width = 1.0)
+        self.s_pick_pen = mkPen(color = (222, 22, 22), width = 1.0)
+        self.p_pick_pen = mkPen(color = (3, 171, 31), width = 1.0)
+        self.msg_pick_pen = mkPen(color = (2, 67, 171), width = 1.0)
         self.plot_pen = mkPen(color = (0, 0, 0), width = 1.0)
 
         self.layout.addWidget(self.plot_widget, 0, 1, 3, 3)
@@ -537,20 +536,22 @@ class EventInfo(QWidget):
     """
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        self.setFixedHeight(200)
+        self.setFixedHeight(250)
         self.event_text = "Event ID: {0}\n"
         self.event_text += "{1}\n"
         self.event_text += "{2} ± {3}\n"
-        self.event_text += "{4} ± {5}, {6} ± {7}\n"
+        self.event_text += "{4}, {5}\n"
+        self.event_text += "±{6}, ±{7}\n"
         self.event_text += "Mag: {8} ± {9}\n\n"
         self.event_text += "Classification: {10}\n"
         self.event_text += "eqex: {11} certainty: {12}\n"
-        self.event_text += "{13}\n"
+        self.event_text += "{13}"
 
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.event_info_text = QTextEdit("No event selected")
+        self.event_info_text.setReadOnly(True)
 
         self.layout.addWidget(self.event_info_text, 0, 0)
 
@@ -575,8 +576,8 @@ class EventInfo(QWidget):
                 " ",
                 "0",
                 " ",
-                "0",
                 " ",
+                "0",
                 "0",
                 " ",
                 "0",
@@ -592,8 +593,8 @@ class EventInfo(QWidget):
                 focused_event.main_h[0].origin_time.strftime("%H:%M:%S.%f")[:-4],
                 "0",
                 focused_event.main_h[0].epicenter_latitude,
-                "0",
                 focused_event.main_h[0].epicenter_longitude,
+                "0",
                 "0",
                 focused_event.main_h[0].magnitude_1,
                 "0",
@@ -609,8 +610,8 @@ class EventInfo(QWidget):
                 focused_event.main_h[0].origin_time.strftime("%H:%M:%S.%f")[:-4],
                 focused_event.main_h[0].error_h.second_error,
                 focused_event.main_h[0].epicenter_latitude,
-                focused_event.main_h[0].error_h.epicenter_latitude_error,
                 focused_event.main_h[0].epicenter_longitude,
+                focused_event.main_h[0].error_h.epicenter_latitude_error,
                 focused_event.main_h[0].error_h.epicenter_longitude_error,
                 focused_event.main_h[0].magnitude_1,
                 focused_event.main_h[0].error_h.magnitude_error,
