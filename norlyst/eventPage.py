@@ -6,7 +6,7 @@ import numpy
 
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QTextEdit, QListWidget, QListWidgetItem,
                              QVBoxLayout, QHBoxLayout, QComboBox, QCheckBox, QLabel, QAbstractItemView,
-                             QDoubleSpinBox, QPushButton, QFrame, QFileDialog)
+                             QDoubleSpinBox, QPushButton, QFrame, QFileDialog, QMessageBox)
 from PyQt5.QtGui import QIcon, QPixmap, QColor, QPainter, QFont
 from PyQt5.QtCore import Qt
 
@@ -517,7 +517,14 @@ class ImportButtons(QWidget):
         """
         mark the current day as done
         """
-        pass
+        msg_box = QMessageBox()
+        msg_box.setText("Mark rest of the events as done?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.No)
+        ans_value = msg_box.exec()
+
+        if ans_value == QMessageBox.Yes:
+            self.parent().parent().parent().parent().markRestOfDayAsDone()
 
     def checkForDailyLock(self, current_date):
         """

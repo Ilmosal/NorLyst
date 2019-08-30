@@ -116,6 +116,14 @@ class NorLystWidget(QWidget):
         self.overview_page.setEventClassifications(self.event_classifications, self.chosen_date)
         self.event_page.setEventClassifications(self.event_classifications, self.chosen_date)
 
+    def markRestOfDayAsDone(self):
+        """
+        This function marks the rest of the events as done without any modifications
+        """
+        for ec in self.event_classifications:
+            if not ec.done:
+                ec.done = True
+
     def focusOnEvent(self, event_id):
         """
         Function for focusing on a single event and passing the information to the rest of the program
