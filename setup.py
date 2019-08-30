@@ -14,6 +14,14 @@ setup(
     description="Simple database managing tool for analysts in ISUH(Institute of Seismology, University of Helsinki).",
     install_requires=[
         "PyQt5",
+        "nordb",
+        "numpy",
+        "pyqtgraph",
+        "obspy",
+        "pathlib",
+        "scipy",
+        "matplotlib",
+        "waveformlocator",
     ],
     long_description=open("README.md").read(),
     entry_points='''

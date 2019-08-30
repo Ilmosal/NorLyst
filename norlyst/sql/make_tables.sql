@@ -27,7 +27,8 @@ CREATE TABLE event_classification(
     certainty VARCHAR(5),
     username VARCHAR(32) REFERENCES nordb_user(username),
     analysis_id INTEGER,
-    unimportant BOOLEAN
+    unimportant BOOLEAN,
+    done BOOLEAN
 );
 
 CREATE TABLE event_comment(

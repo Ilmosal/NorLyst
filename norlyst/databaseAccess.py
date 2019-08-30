@@ -115,6 +115,8 @@ class DatabaseAccesser():
             args.append(update_queue)
             event_classifications.append(EventClassification(*args))
             event_ids.append(ec_array[3])
+            if ec_array[8] != -1:
+                event_ids.append(ec_array[8])
 
         events = getNordic(event_ids, db_conn = self.__conn)
 
@@ -123,6 +125,9 @@ class DatabaseAccesser():
                 if e_classification.event_id == event.event_id:
                     e_classification.setEvent(event)
                     break
+                elif e_classification.analysis_id == event.event_id:
+                    e_classification.setAnalysis(event)
+
 
         return event_classifications
 
@@ -179,6 +184,25 @@ class DatabaseAccesser():
         self.__conn.commit()
         return ans[0]
 
+    def setEventAsDone(self, event_classification_id, done):
+        """
+        Set event to be done.
+        """
+        if not self.isEventLockedToUser(event_classification_id):
+            return False
+
+        cur = self.__conn.cursor()
+
+        cur.execute(UPDATE_DONE, {'event_classification_id':event_classification_id})
+        ans = cur.fetchone()
+
+        if ans is None:
+            return False
+
+        self.__conn.commit()
+        return ans[0]
+
+
     def setEventAsUnimportant(self, event_classification_id, unimportant = True):
         """
         Set event to be unimportant. Returns True if this was successful and False if not.
@@ -208,7 +232,7 @@ GET_DAILY_LIST = """
 
 GET_EVENT_CLASSIFICATIONS = """
     SELECT
-        id, daily_id, priority, event_id, classification, eqex, certainty, username, analysis_id
+        id, daily_id, priority, event_id, classification, eqex, certainty, username, analysis_id, unimportant, done
     FROM
         event_classification
     WHERE
@@ -294,6 +318,7 @@ UPDATE_ANALYSIS_ID = """
         AND
             event_classification.id = %(event_classification_id)s
         )
+    RETURNING True
 """
 
 UPDATE_PRIORITY = """
@@ -361,4 +386,28 @@ UPDATE_UNIMPORTANT = """
     RETURNING
         True
 """
+
+UPDATE_DONE = """
+    UPDATE
+        event_classification
+    SET
+        done = True
+    WHERE
+        id = %(event_classification_id)s
+    AND
+        (
+        SELECT
+            author_lock = CURRENT_USER
+        FROM
+            daily_list, event_classification
+        WHERE
+            daily_list.id = event_classification.daily_id
+        AND
+            event_classification.id = %(event_classification_id)s
+        )
+    RETURNING
+        True
+"""
+
+
 

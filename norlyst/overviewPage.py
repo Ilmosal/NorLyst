@@ -36,10 +36,11 @@ class OverviewPage(QWidget):
 
         self.setLayout(self.layout)
 
-    def setEventClassifications(self, event_classifications):
+    def setEventClassifications(self, event_classifications, chosen_date):
         """
         Function for passing the event_classifications from the norlyst main widget to the overview_map and list of this widget.
         """
+        self.daily_lock_manager.setDailyLockForDate(chosen_date)
         self.overview_map.setEventClassifications(event_classifications)
         self.scroll_area.widget().setEventClassifications(event_classifications, self.daily_lock_manager.lock_status)
 
@@ -83,6 +84,17 @@ class DailyLockManager(QWidget):
         self.layout.addWidget(self.__daily_lock_date)
         self.layout.addWidget(self.__lock_button)
 
+    def setDailyLockForDate(self, chosen_date):
+        """
+        Function for setting this lock into the correct position for this date
+        """
+        if self.__database_access.isDateLockedToUser(chosen_date):
+            self.lock_status = True
+            self.__lock_button.setIcon(QIcon('resources/icons/lock.png'))
+        else:
+            self.lock_status = False
+            self.__lock_button.setIcon(QIcon('resources/icons/unlock.png'))
+
     def setEventDateToDateTimeEditValue(self):
         """
         Function that sets a new value to event_date from the DateTimeEdit widget
@@ -102,13 +114,9 @@ class DailyLockManager(QWidget):
         """
         if self.lock_status:
             self.parent().parent().parent().parent().saveChanges()
-            if self.__database_access.unlockDayForUser(self.events_date):
-                self.lock_status = False
-                self.__lock_button.setIcon(QIcon('resources/icons/lock.png'))
+            self.__database_access.unlockDayForUser(self.events_date)
         else:
-            if self.__database_access.lockDayForUser(self.events_date):
-                self.lock_status = True
-                self.__lock_button.setIcon(QIcon('resources/icons/unlock.png'))
+            self.__database_access.lockDayForUser(self.events_date)
 
         self.parent().parent().parent().parent().setEventsForChosenDate(self.events_date)
 
@@ -141,6 +149,12 @@ class OverviewMap(QQuickWidget):
         """
         self.model.clearAll()
         for ec in event_classifications:
+            if ec.unimportant:
+                continue
+
+            if ec.getEvent().getLatitude().val is None:
+                continue
+
             if ec.priority > 9999:
                 ec_color = QColor(*CLASSIFICATION_COLOR_DICT[21])
             else:
@@ -148,7 +162,7 @@ class OverviewMap(QQuickWidget):
 
             self.model.addMarker(MapMarker(
                 ec.event_id,
-                QPointF(ec.event.getLatitude().val, ec.event.getLongitude().val),
+                QPointF(ec.getEvent().getLatitude().val, ec.getEvent().getLongitude().val),
                 ec_color,
                 ec.focus
             ))
@@ -292,7 +306,7 @@ class OverviewList(QWidget):
         self.layout.setSpacing(8)
 
         self.classification_boxes = []
-        for i in [1,2,3,4,5,6,7,20,21]:
+        for i in [1,2,3,4,5,6,7,10,20,21]:
             self.classification_boxes.append(ClassificationBox(self, i))
 
         self.event_boxes = []
@@ -327,6 +341,9 @@ class OverviewList(QWidget):
         self.__priority_counter = 0
 
         for e_class in event_classifications:
+            if e_class.unimportant:
+                continue
+
             self.event_boxes.append(EventBox(self, e_class, lock_status))
             if e_class.priority != -1:
                 if e_class.priority > 9999 and e_class.priority - 10000 > self.__priority_counter:
@@ -415,13 +432,19 @@ class EventBox(QFrame):
         self.__button_layout.setSpacing(4)
 
         self.__event_classification = event_classification
+        event = self.__event_classification.getEvent()
+
+        if event.getOriginTime() is None:
+            origin_time = "-"
+        else:
+            origin_time = event.getOriginTime().val.strftime("%H:%M:%S")
 
         self.__event_values_text = QLabel('ID: {0}    Time: {1}    Latitude: {2}    Longitude: {3}    Magnitude: {4}'.format(
-            self.__event_classification.event.event_id,
-            self.__event_classification.event.getOriginTime().val.strftime("%H:%M:%S"),
-            self.__event_classification.event.getLatitude().val,
-            self.__event_classification.event.getLongitude().val,
-            self.__event_classification.event.getMagnitude().val,)
+            event.event_id,
+            origin_time,
+            event.getLatitude().val,
+            event.getLongitude().val,
+            event.getMagnitude().val,)
             , self)
         self.__event_values_text.setFixedHeight(20)
 
@@ -498,7 +521,9 @@ class EventBox(QFrame):
         """
         Function for getting the priority of this event box
         """
-        if self.__event_classification.priority == -1:
+        if self.__event_classification.done:
+            return -10
+        elif self.__event_classification.priority == -1:
             return 0 - self.__event_classification.classification
         else:
             return self.__event_classification.priority

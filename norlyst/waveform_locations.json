@@ -1,0 +1,10 @@
+{
+    "waveformLocations":[
+        {
+            "name":"wfdiscs",
+            "type":"CSSArchiveLocation",
+            "file_path":"/home/rdata",
+            "priority":1
+        }
+    ]
+}
