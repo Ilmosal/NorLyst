@@ -385,11 +385,12 @@ class SpectrogramWindow(QWidget):
         self.spectrogram_threads[spectrogram_id].running = False
         self.spectrogram_threads[spectrogram_id].interrupt = False
 
+        if self.waiting_traces[spectrogram_id] is not None:
+            self.calculateSpectrogram(self.waiting_traces[spectrogram_id], self.waiting_p_picks[spectrogram_id], spectrogram_id)
+            self.waiting_traces[spectrogram_id] = None
+            self.waiting_p_picks[spectrogram_id] = None
+
         if spectrogram is None:
-            if self.waiting_traces[spectrogram_id] is not None:
-                self.calculateSpectrogram(self.waiting_traces[spectrogram_id], self.waiting_p_picks[spectrogram_id], spectrogram_id)
-                self.waiting_traces[spectrogram_id] = None
-                self.waiting_p_picks[spectrogram_id] = None
             return
 
         if spectrogram_id == 0:
@@ -422,7 +423,6 @@ class SpectrogramCalculatorThread(QThread):
         if self.p_pick is None:
             self.signal.emit([self.spectrogram_id, None, None, None])
             return
-
         start_time = self.p_pick - SPECTRO_WINDOW_OFFSET
         end_time = start_time + SPECTRO_WINDOW_SIZE
 
