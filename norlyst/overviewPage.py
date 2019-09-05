@@ -443,7 +443,7 @@ class EventBox(QFrame):
         self.__event_classification = event_classification
         event = self.__event_classification.getEvent()
 
-        self.__id_label = QLabel('ID: {0}'.format(event.event_id))
+        self.__id_label = QLabel('ID: {0} - {1}'.format(event.event_id, event.waveform_h[0].getWaveformFileName()))
         self.__id_label.setContentsMargins(5, 5, 5, 5)
         self.__id_label.setStyleSheet('background-color: rgb({0}, {1}, {2}); border-bottom: 1px solid black'.format(*CLASSIFICATION_COLOR_DICT[event_classification.classification]))
 
@@ -490,15 +490,9 @@ class EventBox(QFrame):
         self.__set_as_important_button.setFixedSize(25, 25)
         self.__set_as_important_button.clicked.connect(self.setAsImportantPressed)
 
-#        self.__highlight_event_button = QPushButton('', self)
-#        self.__highlight_event_button.setIcon(QIcon('resources/icons/focus_on_event.png'))
-#        self.__highlight_event_button.setFixedSize(25, 25)
-#        self.__highlight_event_button.clicked.connect(self.highlightEvent)
-
         self.__text_layout.addWidget(self.__event_values_text)
         self.__text_layout.addWidget(self.__event_categorization_text)
 
-#        self.__button_layout.addWidget(self.__highlight_event_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__remove_priority_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__push_to_top_button, 0, Qt.AlignTop)
         self.__button_layout.addWidget(self.__set_as_important_button, 0, Qt.AlignTop)
@@ -570,9 +564,7 @@ class EventBox(QFrame):
         """
         Function for pushing a event to the top of the priority list
         """
-        print(self.__event_classification.priority)
         self.__event_classification.priority = self.parent().getNewPriorityNumber()
-        print(self.__event_classification.priority)
 
         self.parent().parent().parent().parent().parent().parent().parent().setEventClassifications()
         self.__remove_priority_button.setVisible(True)
