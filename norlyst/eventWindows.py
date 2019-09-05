@@ -20,9 +20,8 @@ from obspy import UTCDateTime
 from nordb import createNordicEvents
 from nordb.nordic.nordicComment import NordicComment
 
-from misc import FilterWidget, FilterStats, filterTrace
-
-from config import *
+from norlyst.misc import FilterWidget, FilterStats, filterTrace
+from norlyst.config import *
 
 """
 Import window functionality

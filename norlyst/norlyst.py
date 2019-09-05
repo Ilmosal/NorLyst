@@ -11,10 +11,10 @@ from PyQt5.QtWidgets import (   QMainWindow, QAction, QWidget, QGridLayout,
                                 qApp, QTabWidget)
 from PyQt5.QtGui import QIcon
 
-from overviewPage import OverviewPage
-from eventPage import EventPage
-from databaseAccess import DatabaseAccesser
-from misc import UpdateQueue, WaveformAccessManager
+from norlyst.overviewPage import OverviewPage
+from norlyst.eventPage import EventPage
+from norlyst.databaseAccess import DatabaseAccesser
+from norlyst.misc import UpdateQueue, WaveformAccessManager
 
 class NorLystMain(QMainWindow):
     """

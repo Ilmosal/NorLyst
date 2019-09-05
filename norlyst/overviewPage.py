@@ -1,7 +1,7 @@
 """
 This module contains OverviewPage class and all relevant objects
 """
-
+import os
 import datetime
 
 from PyQt5.QtWidgets import (QWidget, QFrame, QGridLayout, QTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QDateTimeEdit)
@@ -11,7 +11,7 @@ from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtQuickWidgets import QQuickWidget
 from PyQt5.QtQuick import QQuickView
 
-from config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT
+from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT
 
 class OverviewPage(QWidget):
     """
@@ -141,7 +141,9 @@ class OverviewMap(QQuickWidget):
         self.context = self.rootContext()
         self.context.setContextProperty('markerModel', self.model)
 
-        self.setSource(QUrl.fromLocalFile('./map.qml'))
+        map_file_path = os.path.dirname(os.path.abspath(__file__))
+
+        self.setSource(QUrl.fromLocalFile('{0}/map.qml'.format(map_file_path)))
         self.setResizeMode(QQuickWidget.SizeRootObjectToView)
         self.show()
 

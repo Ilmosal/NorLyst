@@ -8,7 +8,7 @@ from PyQt5.QtCore import QTimer, QThread, pyqtSignal, QObject
 
 from waveformlocator.waveformLocator import WaveformLocator
 
-from config import *
+from norlyst.config import *
 
 class EventClassification():
     """

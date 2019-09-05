@@ -19,9 +19,9 @@ from pathlib import Path
 from nordb.nordic.nordicComment import NordicComment
 from nordb import createNordicEvents
 
-from config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, MAX_PLOT_SIZE, DEFAULT_FILTERS
-from eventWindows import SpectrogramWindow, ImportWindow
-from misc import FilterStats, FilterWidget, filterTrace
+from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, MAX_PLOT_SIZE, DEFAULT_FILTERS
+from norlyst.eventWindows import SpectrogramWindow, ImportWindow
+from norlyst.misc import FilterStats, FilterWidget, filterTrace
 
 class EventPage(QWidget):
     """

@@ -26,6 +26,6 @@ setup(
     long_description=open("README.md").read(),
     entry_points='''
         [console_scripts]
-        norlyst=norlyst.norlyst:cli
+        norlyst=norlyst.main:run
     ''',
 )

@@ -4,7 +4,7 @@ This module contains tools for accessing most of the important database operatio
 from nordb.core.usernameUtilities import log2nordb
 from nordb import getNordic
 
-from misc import EventClassification
+from norlyst.misc import EventClassification
 
 class DatabaseAccesser():
     """
