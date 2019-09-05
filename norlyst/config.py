@@ -61,6 +61,8 @@ SPECTRO_WINDOW_SIZE =  timedelta(seconds = 90)
 
 FILTER_TAPER_VALUE = 0.05
 
+PROJECT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+
 WAVEFORM_LOCATOR_CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)) + "/waveform_locations.json"
 
 WAVEFORM_OLD_BUFFER_SIZE = 5

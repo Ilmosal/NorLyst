@@ -1,2 +1,3 @@
 include norlyst/waveform_locations.json
 include norlyst/map.qml
+include norlyst/resources/*

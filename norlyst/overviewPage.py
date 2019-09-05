@@ -11,7 +11,7 @@ from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtQuickWidgets import QQuickWidget
 from PyQt5.QtQuick import QQuickView
 
-from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT
+from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, PROJECT_FILE_PATH
 
 class OverviewPage(QWidget):
     """
@@ -73,9 +73,9 @@ class DailyLockManager(QWidget):
         self.__lock_label = QLabel("<b>Automatic Event Date:</b>", self)
         self.__lock_button = QPushButton('', self)
         if self.lock_status:
-            self.__lock_button.setIcon(QIcon('resources/icons/unlock.png'))
+            self.__lock_button.setIcon(QIcon('{0}/resources/icons/unlock.png'.format(PROJECT_FILE_PATH)))
         else:
-            self.__lock_button.setIcon(QIcon('resources/icons/lock.png'))
+            self.__lock_button.setIcon(QIcon('{0}/resources/icons/lock.png'.format(PROJECT_FILE_PATH)))
         self.__lock_button.setFixedSize(30, 30)
         self.__lock_button.clicked.connect(self.lockButtonPressed)
 
@@ -95,10 +95,10 @@ class DailyLockManager(QWidget):
         """
         if self.__database_access.isDateLockedToUser(chosen_date):
             self.lock_status = True
-            self.__lock_button.setIcon(QIcon('resources/icons/lock.png'))
+            self.__lock_button.setIcon(QIcon('{0}/resources/icons/lock.png'.format(PROJECT_FILE_PATH)))
         else:
             self.lock_status = False
-            self.__lock_button.setIcon(QIcon('resources/icons/unlock.png'))
+            self.__lock_button.setIcon(QIcon('{0}/resources/icons/unlock.png'.format(PROJECT_FILE_PATH)))
 
     def setEventDateToDateTimeEditValue(self):
         """
@@ -141,9 +141,7 @@ class OverviewMap(QQuickWidget):
         self.context = self.rootContext()
         self.context.setContextProperty('markerModel', self.model)
 
-        map_file_path = os.path.dirname(os.path.abspath(__file__))
-
-        self.setSource(QUrl.fromLocalFile('{0}/map.qml'.format(map_file_path)))
+        self.setSource(QUrl.fromLocalFile('{0}/map.qml'.format(PROJECT_FILE_PATH)))
         self.setResizeMode(QQuickWidget.SizeRootObjectToView)
         self.show()
 
@@ -472,7 +470,7 @@ class EventBox(QFrame):
         self.__event_categorization_text.setFixedHeight(20)
 
         self.__remove_priority_button = QPushButton('', self)
-        self.__remove_priority_button.setIcon(QIcon('resources/icons/remove.png'))
+        self.__remove_priority_button.setIcon(QIcon('{0}/resources/icons/remove.png'.format(PROJECT_FILE_PATH)))
         self.__remove_priority_button.setFixedSize(25, 25)
         self.__remove_priority_button.clicked.connect(self.removePriority)
 
@@ -480,15 +478,15 @@ class EventBox(QFrame):
             self.__remove_priority_button.hide()
 
         self.__push_to_top_button = QPushButton('', self)
-        self.__push_to_top_button.setIcon(QIcon('resources/icons/push_to_top.png'))
+        self.__push_to_top_button.setIcon(QIcon('{0}/resources/icons/push_to_top.png'.format(PROJECT_FILE_PATH)))
         self.__push_to_top_button.setFixedSize(25, 25)
         self.__push_to_top_button.clicked.connect(self.pushToTopPressed)
 
         self.__set_as_important_button = QPushButton('', self)
         if self.__event_classification.priority > 9999:
-            self.__set_as_important_button.setIcon(QIcon('resources/icons/set_as_unimportant.png'))
+            self.__set_as_important_button.setIcon(QIcon('{0}/resources/icons/set_as_unimportant.png'.format(PROJECT_FILE_PATH)))
         else:
-            self.__set_as_important_button.setIcon(QIcon('resources/icons/set_as_important.png'))
+            self.__set_as_important_button.setIcon(QIcon('{0}/resources/icons/set_as_important.png'.format(PROJECT_FILE_PATH)))
         self.__set_as_important_button.setFixedSize(25, 25)
         self.__set_as_important_button.clicked.connect(self.setAsImportantPressed)
 
@@ -551,14 +549,14 @@ class EventBox(QFrame):
         Function for setting a single event box as important.
         """
         if self.__event_classification.priority > 9999:
-            self.__set_as_important_button.setIcon(QIcon('resources/icons/set_as_important.png'))
+            self.__set_as_important_button.setIcon(QIcon('{0}/resources/icons/set_as_important.png'.format(PROJECT_FILE_PATH)))
             self.__event_classification.priority -= 10001
             self.__push_to_top_button.setEnabled(True)
             self.__event_classification.focus = False
             self.parent().parent().parent().parent().parent().parent().parent().setEventClassifications()
         else:
             self.__event_classification.priority += 10001
-            self.__set_as_important_button.setIcon(QIcon('resources/icons/set_as_unimportant.png'))
+            self.__set_as_important_button.setIcon(QIcon('{0}/resources/icons/set_as_unimportant.png'.format(PROJECT_FILE_PATH)))
             self.__push_to_top_button.setEnabled(False)
             self.highlightEvent()
 

@@ -19,7 +19,7 @@ from pathlib import Path
 from nordb.nordic.nordicComment import NordicComment
 from nordb import createNordicEvents
 
-from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, MAX_PLOT_SIZE, DEFAULT_FILTERS
+from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, MAX_PLOT_SIZE, DEFAULT_FILTERS, PROJECT_FILE_PATH
 from norlyst.eventWindows import SpectrogramWindow, ImportWindow
 from norlyst.misc import FilterStats, FilterWidget, filterTrace
 
@@ -401,7 +401,7 @@ class EventList(QListWidget):
             icon_pixmap_color = QPixmap(48, 48)
             icon_pixmap_color.fill(QColor(*CLASSIFICATION_COLOR_DICT[key]))
             icon_pixmap_border = QPixmap(48, 48)
-            icon_pixmap_border.load('resources/icons/icon_borders.png')
+            icon_pixmap_border.load('{0}/resources/icons/icon_borders.png'.format(PROJECT_FILE_PATH))
 
             painter = QPainter(icon_pixmap_color)
             painter.drawPixmap(0, 0, icon_pixmap_border)
@@ -412,7 +412,7 @@ class EventList(QListWidget):
             icon_pixmap_color = QPixmap(48, 48)
             icon_pixmap_color.fill(QColor(*CLASSIFICATION_COLOR_DICT[key]))
             icon_pixmap_border = QPixmap(48, 48)
-            icon_pixmap_border.load('resources/icons/icon_borders_finished.png')
+            icon_pixmap_border.load('{0}/resources/icons/icon_borders_finished.png'.format(PROJECT_FILE_PATH))
 
             painter = QPainter(icon_pixmap_color)
             painter.drawPixmap(0, 0, icon_pixmap_border)
@@ -423,7 +423,7 @@ class EventList(QListWidget):
             icon_pixmap_color = QPixmap(48, 48)
             icon_pixmap_color.fill(QColor(*CLASSIFICATION_COLOR_DICT[key]))
             icon_pixmap_border = QPixmap(48, 48)
-            icon_pixmap_border.load('resources/icons/icon_borders_unimportant.png')
+            icon_pixmap_border.load('{0}/resources/icons/icon_borders_unimportant.png'.format(PROJECT_FILE_PATH))
 
             painter = QPainter(icon_pixmap_color)
             painter.drawPixmap(0, 0, icon_pixmap_border)
