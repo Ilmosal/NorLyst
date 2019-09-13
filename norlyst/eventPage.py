@@ -507,9 +507,6 @@ class ImportButtons(QWidget):
         """
         Open import window for the current event
         """
-        if self.import_window is not None:
-            return
-
         self.import_window = ImportWindow(self.database_access, self.parent().getFocusedEventClassification())
         self.import_window.show()
 

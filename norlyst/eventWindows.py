@@ -37,6 +37,7 @@ class ImportWindow(QWidget):
         self.layout = QGridLayout(self)
         self.database_accesser = database_accesser
         self.event_classification = ec
+        self.is_hidden = False
 
         self.analysis_label = QLabel('Type', self)
         self.analysis_label.setFixedWidth(50)
@@ -149,6 +150,9 @@ class ImportWindow(QWidget):
         elif self.analysis_type.currentText() == "Not an event":
             self.event_classification.unimportant = True
             self.event_classification.done = True
+
+        self.is_hidden = True
+        self.hide()
 
     def categorizeThisEvent(self, cat_type, reviewed, comments):
         """
