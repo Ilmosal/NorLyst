@@ -8,20 +8,25 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QTextEdit, QListWidget, QList
                              QVBoxLayout, QHBoxLayout, QComboBox, QCheckBox, QLabel, QAbstractItemView,
                              QDoubleSpinBox, QPushButton, QFrame, QFileDialog, QMessageBox)
 from PyQt5.QtGui import QIcon, QPixmap, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl, QPointF
+from PyQt5.QtQuickWidgets import QQuickWidget
 
 from pyqtgraph import PlotWidget, PlotDataItem, PlotItem, TextItem, ErrorBarItem, mkPen, setConfigOption
 
 from obspy import UTCDateTime
 
+import pyproj
+
 from pathlib import Path
 
 from nordb.nordic.nordicComment import NordicComment
 from nordb import createNordicEvents
+from nordb import getAllStations
 
 from norlyst.config import CLASSIFICATION_COLOR_DICT, CLASSIFICATION_STRING_DICT, CLASSIFICATION_PRIORITY_DICT, MAX_PLOT_SIZE, DEFAULT_FILTERS, PROJECT_FILE_PATH
 from norlyst.eventWindows import SpectrogramWindow, ImportWindow
 from norlyst.misc import FilterStats, FilterWidget, filterTrace
+from norlyst.overviewPage import MarkerModel, MapMarker
 
 class EventPage(QWidget):
     """
@@ -67,11 +72,7 @@ class EventPage(QWidget):
         """
         Function for opening the spectrogram window
         """
-        if self.spectrogram_widget is None:
-            self.spectrogram_widget = SpectrogramWindow(self.station_list)
-        else:
-            self.spectrogram_widget.hidden = False
-            self.spectrogram_widget.setStationsFromNewEvent()
+        self.spectrogram_widget = SpectrogramWindow(self.station_list)
 
         self.spectrogram_widget.show()
 
@@ -105,12 +106,6 @@ class EventPage(QWidget):
         n_file.write(str(current_event_class.getEvent()))
         n_file.close()
 
-    def importEvent(self):
-        """
-        Button for importing a solution to this automatic event
-        """
-        pass
-
     def setEventClassifications(self, event_classifications, chosen_date):
         """
         Set event classifications to all child objects
@@ -118,6 +113,7 @@ class EventPage(QWidget):
         self.import_buttons.checkForDailyLock(chosen_date)
         self.event_list.setEventClassifications(event_classifications)
         self.event_info.updateEventInfo()
+        self.event_page_map.updateEventPageMap()
 
     def getFocusedEventClassification(self):
         """
@@ -190,13 +186,23 @@ class StationList(QWidget):
         self.event = event
         self.waveform_traces = waveform_traces
 
-        station_data = []
-        for pick in event.data:
-            if pick.station_code not in [sd[0] for sd in station_data]:
-                station_data.append([pick.station_code, pick.epicenter_distance, pick.epicenter_to_station_azimuth])
+        stations = getAllStations(station_date = event.getOriginTime().val)
+        stat_dict = {}
 
+        for stat in stations:
+            stat_dict[stat.station_code] = stat
+
+        station_data = []
+
+        geodesic = pyproj.Geod(ellps='WGS84')
         for tr in waveform_traces.values():
-            if tr[0].stats['station'] not in [sd[0] for sd in station_data]:
+            if tr[0].stats['station'] in stat_dict.keys():
+                fwd_azimuth, back_azimuth, distance = geodesic.inv(
+                    event.getLatitude().val, event.getLongitude().val,
+                    stat_dict[tr[0].stats['station']].latitude, stat_dict[tr[0].stats['station']].longitude
+                )
+                station_data.append([tr[0].stats['station'], int(distance/1000), int(fwd_azimuth)])
+            else:
                 station_data.append([tr[0].stats['station'], None, None])
 
         station_data = sorted(station_data, key = lambda x: (x[1] is None, x[1]))
@@ -391,7 +397,7 @@ class EventList(QListWidget):
     """
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        self.setFixedWidth(150)
+        self.setFixedWidth(250)
 
         self.ec_icons = {}
         self.ec_icons_finished = {}
@@ -438,11 +444,12 @@ class EventList(QListWidget):
         """
         self.clear()
         for ec in event_classifications:
-            list_item_string = "Event {0}"
             try:
-                list_item = QListWidgetItem(list_item_string.format(ec.event_id), self)
+                list_item = QListWidgetItem(ec.event.waveform_h[0].getWaveformFileName(), self)
             except Exception as e:
                 list_item = QListWidgetItem(str(e), self)
+
+            list_item.setData(Qt.UserRole, ec.event_id)
 
             if ec.done:
                 list_item.setIcon(self.ec_icons_finished[10])
@@ -477,7 +484,7 @@ class EventList(QListWidget):
         """
         Focus on the selected item on the item list
         """
-        event_id = int(self.currentItem().text().split(' ')[1])
+        event_id = self.currentItem().data(Qt.UserRole)
         self.parent().parent().parent().parent().focusOnEvent(event_id)
 
 class ImportButtons(QWidget):
@@ -626,18 +633,46 @@ class EventInfo(QWidget):
 
             ))
 
-
-class EventPageMap(QFrame):
+class EventPageMap(QQuickWidget):
     """
     Small map for visualizing the location of the event
     """
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
-        self.setFixedWidth(400)
+        super(QQuickWidget, self).__init__(parent)
+        self.setFixedWidth(500)
         self.setFixedHeight(400)
-        self.setFrameStyle(1)
-        self.label = QLabel('EventPageMap', self)
-        self.layout = QHBoxLayout()
-        self.layout.addWidget(self.label)
-        self.setLayout(self.layout)
+
+        self.model = MarkerModel()
+        self.context = self.rootContext()
+        self.context.setContextProperty('markerModel', self.model)
+
+        self.setSource(QUrl.fromLocalFile('{0}/mini_map.qml'.format(PROJECT_FILE_PATH)))
+        self.setResizeMode(QQuickWidget.SizeRootObjectToView)
+        self.show()
+
+    def focusOnEvent(self, ec):
+        """
+        Focus map on a single event classification
+        """
+        self.model.clearAll()
+        if ec is None:
+            return
+
+        ec_color = QColor(*CLASSIFICATION_COLOR_DICT[ec.classification])
+
+        self.model.addMarker(MapMarker(
+            ec.event_id,
+            QPointF(ec.getEvent().getLatitude().val, ec.getEvent().getLongitude().val),
+            ec_color,
+            ec.focus
+        ))
+
+        self.rootObject().childItems()[0].updateMap(ec.getEvent().getLatitude().val, ec.getEvent().getLongitude().val)
+
+    def updateEventPageMap(self):
+        """
+        Update this widget when events change
+        """
+        focused_event_class = self.parent().getFocusedEventClassification()
+        self.focusOnEvent(focused_event_class)
 

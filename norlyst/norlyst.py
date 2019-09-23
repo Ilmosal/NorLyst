@@ -29,7 +29,7 @@ class NorLystMain(QMainWindow):
         self.height = screen_size.height()
 
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        #self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.norlyst_widget = NorLystWidget(self)
         self.setCentralWidget(self.norlyst_widget)

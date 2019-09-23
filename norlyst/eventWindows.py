@@ -385,6 +385,8 @@ class SpectrogramWindow(QWidget):
         Function for plotting a spectrogram
         """
         spectrogram_id, spectrogram, sample_frequencies, sample_times = return_values
+        print("Window {0} done".format(spectrogram_id))
+
         self.spectrogram_threads[spectrogram_id].running = False
         self.spectrogram_threads[spectrogram_id].interrupt = False
 
@@ -423,6 +425,7 @@ class SpectrogramCalculatorThread(QThread):
         """
         Calculate spectrogram from trace
         """
+        print("Fetching window {0}".format(self.spectrogram_id))
         if self.p_pick is None:
             self.signal.emit([self.spectrogram_id, None, None, None])
             return
